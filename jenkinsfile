@@ -1,0 +1,68 @@
+pipeline {
+    agent any
+
+    environment {
+        COMPOSE_PROJECT_NAME = "docker-compose-web-app"
+    }
+
+    stages {
+
+        stage('Checkout Source Code') {
+            steps {
+                echo 'Cloning GitHub Repository...'
+                git branch: 'main',
+                    url: 'https://github.com/Rakeshchintu123/docker-compose-web-app.git'
+            }
+        }
+
+        stage('Verify Docker') {
+            steps {
+                bat 'docker --version'
+                bat 'docker compose version'
+            }
+        }
+
+        stage('Build Docker Images') {
+            steps {
+                echo 'Building Docker Images...'
+                bat 'docker compose build'
+            }
+        }
+
+        stage('Start Containers') {
+            steps {
+                echo 'Starting Containers...'
+                bat 'docker compose up -d'
+            }
+        }
+
+        stage('Verify Running Containers') {
+            steps {
+                bat 'docker ps'
+            }
+        }
+
+        stage('Display Logs') {
+            steps {
+                bat 'docker compose logs'
+            }
+        }
+
+    }
+
+    post {
+
+        success {
+            echo 'Deployment Completed Successfully'
+        }
+
+        failure {
+            echo 'Deployment Failed'
+        }
+
+        always {
+            echo 'Cleaning Workspace'
+            cleanWs()
+        }
+    }
+}
